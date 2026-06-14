@@ -2,11 +2,7 @@ import { Text, View } from "react-native";
 
 export default function ProfileScreen() {
 	return (
-		<View
-			style={{
-				padding: 20,
-			}}
-		>
+		<View>
 			<Text>ProfileScreen</Text>
 		</View>
 	);
