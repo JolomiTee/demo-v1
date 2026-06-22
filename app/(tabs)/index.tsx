@@ -1,12 +1,11 @@
-import { Link } from "expo-router";
-import { View } from "react-native";
+import { UserButton } from "@clerk/expo/native";
+import { Text, View } from "react-native";
 
 export default function Index() {
 	return (
 		<View>
-			<Link style={{ margin: 10 }} href={"/notifications"}>
-				Your Personal Feeds
-			</Link>
+			<Text>Your Personal Feeds</Text>
+			<UserButton />
 		</View>
 	);
 }
