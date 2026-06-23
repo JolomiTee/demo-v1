@@ -81,6 +81,8 @@ export const getFeedPosts = query({
 			posts.map(async (post) => {
 				const postAuthor = await ctx.db.get(post.userId)
 
+				const imageUrl = await ctx.storage.getUrl(post.storageId);
+
 				const like = await ctx.db.query("likes")
 					.withIndex("by_user_and_post", (q) => q.eq("userId", user._id).eq("postId", post._id)).first()
 
@@ -89,6 +91,7 @@ export const getFeedPosts = query({
 
 				return {
 					...post,
+					imageUrl,
 					author: {
 						_id: postAuthor?._id,
 						username: postAuthor?.username,

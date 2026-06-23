@@ -4,10 +4,12 @@ import { Id } from "@/convex/_generated/dataModel";
 import { styles } from "@/styles/feed.styles";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "convex/react";
+import { formatDistanceToNow } from "date-fns";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import CommentsModal from "./CommentsModal";
 
 type PostProps = {
 	_creationTime: number;
@@ -21,15 +23,18 @@ type PostProps = {
 	isBookmarked: boolean;
 	caption?: string | undefined;
 	comments: number;
-	imageUrl: string;
+	imageUrl: string | null;
 	likes: number;
 	storageId: Id<"_storage">;
 	userId: Id<"users">;
 };
+
 export default function Post({ post }: { post: PostProps }) {
 	const [isLiked, setIsLiked] = useState(post.isLike);
 	const [likesCount, setLikesCount] = useState(post.likes);
+	const [commentsCount, setCommentsCount] = useState(post.comments);
 	const toggleLike = useMutation(api.posts.toggleLike);
+	const [showComments, setShowComments] = useState(false);
 
 	const handleLike = async () => {
 		try {
@@ -42,6 +47,7 @@ export default function Post({ post }: { post: PostProps }) {
 			console.log("Error toggling likes");
 		}
 	};
+
 	return (
 		<View style={styles.post}>
 			<View style={styles.postHeader}>
@@ -88,7 +94,7 @@ export default function Post({ post }: { post: PostProps }) {
 							color={isLiked ? COLORS.primary : COLORS.white}
 						/>
 					</TouchableOpacity>
-					<TouchableOpacity>
+					<TouchableOpacity onPress={() => setShowComments(true)}>
 						<Ionicons
 							name="chatbubble-outline"
 							size={22}
@@ -117,12 +123,25 @@ export default function Post({ post }: { post: PostProps }) {
 					</View>
 				)}
 
-				<TouchableOpacity>
-					<Text style={styles.commentText}>View all 2 comments</Text>
-				</TouchableOpacity>
+				{commentsCount > 0 && (
+					<TouchableOpacity onPress={() => setShowComments(true)}>
+						<Text style={styles.commentText}>
+							View all {commentsCount} comments
+						</Text>
+					</TouchableOpacity>
+				)}
 
-				<Text style={styles.timeAgo}>2 hours ago</Text>
+				<Text style={styles.timeAgo}>
+					{formatDistanceToNow(post._creationTime, { addSuffix: true })}
+				</Text>
 			</View>
+
+			<CommentsModal
+				postId={post._id}
+				visible={showComments}
+				onClose={() => setShowComments(false)}
+				onCommentAdded={() => setCommentsCount((prev) => prev + 1)}
+			/>
 		</View>
 	);
 }
