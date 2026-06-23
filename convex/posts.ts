@@ -3,8 +3,9 @@ import { mutation, query } from "./_generated/server";
 import { getAuthenticatedUser } from "./users";
 
 export const generatedUploadUrl = mutation(async (ctx) => {
-	const identity = await ctx.auth.getUserIdentity();
-	if (!identity) throw new Error("Unauthorized")
+	const user = await getAuthenticatedUser(ctx)
+
+	if (!user) throw new Error("Unauthorized")
 		return await ctx.storage.generateUploadUrl()
 })
 
@@ -43,9 +44,33 @@ export const createPost = mutation({
 	}
 })
 
+/**
+ * `getFeedPosts` is a query (not a mutation), so Convex runs it reactively. When your app mounts, `useQuery(api.posts.getFeedPosts)` subscribes immediately — but the Clerk auth token hasn't been synced to Convex yet. So `ctx.auth.getUserIdentity()` returns null, and `getAuthenticatedUser` throws "Unauthorized".
+
+What the fix does
+Instead of calling getAuthenticatedUser (which throws), the query should do this:
+
+	1. Check getUserIdentity() directly
+	2. Returns [] if there's no auth yet (graceful fallback)
+	3. Returns [] if the user record isn't found
+	4. Otherwise proceeds normally
+The query will automatically re-run once the auth token is ready, at which point it'll return the real data. This is the standard Convex pattern for queries that need auth.
+
+_Note_: The getAuthenticatedUser helper is fine for mutations (which are one-shot calls that only fire when the user explicitly acts), but queries need to handle the unauthenticated state gracefully since they run reactively.
+ */
+
 export const getFeedPosts = query({
 	handler: async (ctx) => {
-		const user = await getAuthenticatedUser(ctx)
+
+
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) return [];
+
+		const user = await ctx.db.query("users")
+			.withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+			.first();
+
+		if (!user) return [];
 
 		// get all posts
 		const posts = await ctx.db.query("posts").order("desc").collect()
@@ -77,5 +102,43 @@ export const getFeedPosts = query({
 
 		return formattedPosts
 
+	}
+})
+
+export const toggleLike = mutation({
+	args: {
+		postId: v.id("posts")
+	},
+
+	handler: async (ctx, args) => {
+		const user = await getAuthenticatedUser(ctx);
+
+		const existing = await ctx.db.query("likes").withIndex("by_user_and_post", (q) => q.eq("userId", user._id).eq("postId", args.postId)).first();
+
+		const post = await ctx.db.get(args.postId);
+
+		if (!post) throw new Error("Post not found");
+
+		if (existing) {
+			await ctx.db.delete(existing._id);
+			await ctx.db.patch(args.postId, { likes: post.likes - 1 });
+		} else {
+			await ctx.db.insert("likes", {
+				userId: user._id,
+				postId: args.postId
+			});
+			await ctx.db.patch(args.postId, { likes: post.likes + 1 });
+
+			if (user._id !== post.userId) {
+				await ctx.db.insert("notifications", {
+					recieverId: post.userId,
+					senderId: user._id,
+					type: "like",
+					postId: args.postId
+				})
+			};;
+
+			return true
+		}
 	}
 })

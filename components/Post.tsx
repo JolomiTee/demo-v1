@@ -1,16 +1,52 @@
 import { COLORS } from "@/constants/theme";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { styles } from "@/styles/feed.styles";
 import { Ionicons } from "@expo/vector-icons";
+import { useMutation } from "convex/react";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
+import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
-export default function Post({ post }: { post: any }) {
+type PostProps = {
+	_creationTime: number;
+	_id: Id<"posts">;
+	author: {
+		_id: Id<"users"> | undefined;
+		username: string | undefined;
+		image: string | undefined;
+	};
+	isLike: boolean;
+	isBookmarked: boolean;
+	caption?: string | undefined;
+	comments: number;
+	imageUrl: string;
+	likes: number;
+	storageId: Id<"_storage">;
+	userId: Id<"users">;
+};
+export default function Post({ post }: { post: PostProps }) {
+	const [isLiked, setIsLiked] = useState(post.isLike);
+	const [likesCount, setLikesCount] = useState(post.likes);
+	const toggleLike = useMutation(api.posts.toggleLike);
+
+	const handleLike = async () => {
+		try {
+			const newIsLiked = await toggleLike({ postId: post._id });
+
+			setLikesCount((prev) => (newIsLiked ? prev + 1 : prev - 1));
+
+			setIsLiked(!!newIsLiked);
+		} catch (error) {
+			console.log("Error toggling likes");
+		}
+	};
 	return (
 		<View style={styles.post}>
 			<View style={styles.postHeader}>
 				<Link href={"/"}>
-					<TouchableOpacity>
+					<TouchableOpacity style={styles.postHeaderLeft}>
 						<Image
 							source={post.author.image}
 							style={styles.postAvatar}
@@ -45,11 +81,11 @@ export default function Post({ post }: { post: any }) {
 			{/* Post Actions */}
 			<View style={styles.postActions}>
 				<View style={styles.postActionsLeft}>
-					<TouchableOpacity>
+					<TouchableOpacity onPress={handleLike}>
 						<Ionicons
-							name="heart-outline"
+							name={isLiked ? "heart" : "heart-outline"}
 							size={24}
-							color={COLORS.white}
+							color={isLiked ? COLORS.primary : COLORS.white}
 						/>
 					</TouchableOpacity>
 					<TouchableOpacity>
@@ -67,7 +103,11 @@ export default function Post({ post }: { post: any }) {
 
 			{/* Post Info */}
 			<View style={styles.postInfo}>
-				<Text style={styles.likesText}>Be the first to like this post</Text>
+				<Text style={styles.likesText}>
+					{likesCount > 0
+						? `${likesCount.toLocaleString()} like`
+						: "Be the first to like this post"}
+				</Text>
 				{post.caption && (
 					<View style={styles.captionContainer}>
 						<Text style={styles.captionUsername}>
