@@ -1,9 +1,20 @@
 import ClerkConvexProviders from "@/components/providers/Clerk_Convex_Providers";
-import { Slot, usePathname } from "expo-router";
+import { useFonts } from "expo-font";
+import { Slot, SplashScreen, usePathname } from "expo-router";
+import { useCallback } from "react";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
 	const pathname = usePathname();
+	const [fontsLoaded] = useFonts({
+		"JetBrainsMono-Medium": require("@/assets/fonts/JetBrainsMono-Medium.ttf"),
+	});
+
+	const onLayoutRootView = useCallback(async () => {
+		if (fontsLoaded) SplashScreen.hideAsync();
+	}, [fontsLoaded]);
 
 	console.log(pathname);
 	return (
@@ -14,6 +25,7 @@ export default function RootLayout() {
 						flex: 1,
 						backgroundColor: "black",
 					}}
+					onLayout={onLayoutRootView}
 				>
 					<Slot />
 				</SafeAreaView>
