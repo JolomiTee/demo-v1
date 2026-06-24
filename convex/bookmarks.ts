@@ -30,7 +30,8 @@ export const getBookmarkedPosts = query({
 		const bookmarkWithInfo = await Promise.all(
 			bookmarks.map(async (bookmarks) => {
 				const post = await ctx.db.get(bookmarks.postId)
-				return post;
+				const imageUrl = post && await ctx.storage.getUrl(post.storageId);
+				return {...post, imageUrl};
 			})
 		)
 
