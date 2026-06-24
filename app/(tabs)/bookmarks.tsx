@@ -13,8 +13,6 @@ export default function Bookmarks() {
 
 	if (bookmarkedPosts.length === 0) return <BookmarksNotFound />;
 
-	console.log(bookmarkedPosts);
-
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>

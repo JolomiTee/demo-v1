@@ -1,6 +1,6 @@
 // styles/notifications.styles.ts
-import { StyleSheet } from "react-native";
 import { COLORS } from "@/constants/theme";
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
@@ -28,9 +28,10 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
   notificationContent: {
-    flex: 1,
+	  flex: 1,
+	 display: "flex",
+	 gap: 12,
     flexDirection: "row",
-    alignItems: "center",
     marginRight: 12,
   },
   avatarContainer: {
