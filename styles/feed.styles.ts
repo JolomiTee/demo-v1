@@ -134,9 +134,9 @@ export const styles = StyleSheet.create({
   },
   modalContainer: {
     backgroundColor: COLORS.background,
-    marginBottom: Platform.OS === "ios" ? 44 : 10,
+	 marginBottom: Platform.OS === "ios" ? 44 : 0,
     flex: 1,
-    marginTop: 44,
+    marginTop: Platform.OS === "ios" ? 44 : 0,
   },
   modalHeader: {
     flexDirection: "row",

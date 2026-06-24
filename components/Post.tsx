@@ -2,8 +2,9 @@ import { COLORS } from "@/constants/theme";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { styles } from "@/styles/feed.styles";
+import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
@@ -36,8 +37,15 @@ export default function Post({ post }: { post: PostProps }) {
 	const [commentsCount, setCommentsCount] = useState(post.comments);
 	const [showComments, setShowComments] = useState(false);
 
+	const { user } = useUser();
+	const currentUser = useQuery(
+		api.users.getUserByClerkId,
+		user ? { clerkId: user?.id } : "skip",
+	);
+
 	const toggleLike = useMutation(api.posts.toggleLike);
 	const toggleBookmark = useMutation(api.bookmarks.toggleBookmark);
+	const deletePost = useMutation(api.posts.deletePost);
 
 	const handleLike = async () => {
 		try {
@@ -54,6 +62,14 @@ export default function Post({ post }: { post: PostProps }) {
 	const handleToggleBookmark = async () => {
 		const newIsBookmarked = await toggleBookmark({ postId: post._id });
 		setIsBookmarked(newIsBookmarked);
+	};
+
+	const handleDelete = async () => {
+		try {
+			await deletePost({ postId: post._id });
+		} catch (error) {
+			console.log("Error deleting post: ", error);
+		}
 	};
 
 	return (
@@ -75,12 +91,23 @@ export default function Post({ post }: { post: PostProps }) {
 				</Link>
 
 				{/* show a delete button */}
-				{/* <TouchableOpacity>
-					<Ionicons name="ellipsis-horizontal" size={20} color={COLORS.white}  />
-				</TouchableOpacity> */}
-				<TouchableOpacity>
-					<Ionicons name="trash-outline" size={20} color={COLORS.white} />
-				</TouchableOpacity>
+				{post.author._id === currentUser?._id ? (
+					<TouchableOpacity onPress={handleDelete}>
+						<Ionicons
+							name="trash-outline"
+							size={20}
+							color={COLORS.white}
+						/>
+					</TouchableOpacity>
+				) : (
+					<TouchableOpacity>
+						<Ionicons
+							name="ellipsis-horizontal"
+							size={20}
+							color={COLORS.white}
+						/>
+					</TouchableOpacity>
+				)}
 			</View>
 
 			{/* Image */}
@@ -128,9 +155,9 @@ export default function Post({ post }: { post: PostProps }) {
 				</Text>
 				{post.caption && (
 					<View style={styles.captionContainer}>
-						<Text style={styles.captionUsername}>
+						{/* <Text style={styles.captionUsername}>
 							{post.author.username}
-						</Text>
+						</Text> */}
 						<Text style={styles.captionText}>{post.caption}</Text>
 					</View>
 				)}

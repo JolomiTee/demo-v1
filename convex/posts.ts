@@ -145,3 +145,44 @@ export const toggleLike = mutation({
 		}
 	}
 })
+
+export const deletePost = mutation({
+	args: { postId: v.id("posts") },
+	handler: async (ctx, args) => {
+
+		const user = await getAuthenticatedUser(ctx);
+
+		const post = await ctx.db.get(args.postId)
+
+		if (!post) throw new Error("Post not found")
+
+		if (post.userId !== user._id) throw new Error("Not authorized to delete this post")
+
+		const likes = await ctx.db
+			.query("likes")
+			.withIndex('by_post', (q) => q.eq("postId", args.postId))
+			.collect()
+
+		for (const like of likes) {
+			await ctx.db.delete(like._id)
+		}
+
+		const comments = await ctx.db
+			.query("comments")
+			.withIndex("by_post", (q) => q.eq("postId", args.postId))
+			.collect()
+
+		for (const comment of comments) {
+			await ctx.db.delete(comment._id)
+		}
+
+		await ctx.storage.delete(post.storageId)
+
+		await ctx.db.delete(args.postId)
+
+		await ctx.db.patch(user._id, {
+			posts: Math.max(0, (user.posts || 1) - 1)
+		})
+
+	}
+})
