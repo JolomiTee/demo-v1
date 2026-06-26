@@ -4,6 +4,7 @@ import { api } from "@/convex/_generated/api";
 import { Doc } from "@/convex/_generated/dataModel";
 import { styles } from "@/styles/profile.styles";
 import { useAuth } from "@clerk/expo";
+import { UserButton } from "@clerk/expo/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import { Image } from "expo-image";
@@ -23,7 +24,7 @@ import {
 } from "react-native";
 
 export default function ProfileScreen() {
-	const { signOut, userId } = useAuth();
+	const { userId } = useAuth();
 
 	const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 	const [selectedPost, setSelectedPost] = useState<Doc<"posts"> | null>(null);
@@ -56,16 +57,7 @@ export default function ProfileScreen() {
 					<Text style={styles.username}>{currentUser.username}</Text>
 				</View>
 				<View style={styles.headerRight}>
-					<TouchableOpacity
-						style={styles.headerIcon}
-						onPress={() => signOut()}
-					>
-						<Ionicons
-							name="log-out-outline"
-							size={24}
-							color={COLORS.white}
-						/>
-					</TouchableOpacity>
+					<UserButton />
 				</View>
 			</View>
 
@@ -135,7 +127,7 @@ export default function ProfileScreen() {
 					renderItem={({ item }) => (
 						<TouchableOpacity
 							style={styles.gridItem}
-							// onPress={() => setSelectedPost(item)}
+							onPress={() => setSelectedPost(item)}
 						>
 							<Image
 								source={item.imageUrl}

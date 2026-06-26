@@ -24,7 +24,11 @@ type ICommentModal = {
 	onClose: () => void;
 };
 
-export default function CommentsModal({ postId, visible, onClose }: ICommentModal) {
+export default function CommentsModal({
+	postId,
+	visible,
+	onClose,
+}: ICommentModal) {
 	const [newComment, setnewComment] = useState("");
 	const comments = useQuery(api.comments.getComments, { postId });
 	const addComment = useMutation(api.comments.addComment);
@@ -50,10 +54,11 @@ export default function CommentsModal({ postId, visible, onClose }: ICommentModa
 			animationType="slide"
 			transparent
 			onRequestClose={onClose}
-			style={{ maxHeight: "90%" }}
+			style={{ maxHeight: "70%" }}
 		>
 			<KeyboardAvoidingView
 				behavior={Platform.OS === "ios" ? "padding" : "height"}
+				// behavior="padding"
 				style={styles.modalContainer}
 			>
 				<View style={styles.modalHeader}>

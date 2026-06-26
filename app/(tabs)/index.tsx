@@ -6,17 +6,11 @@ import { COLORS } from "@/constants/theme";
 import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles/feed.styles";
 import { useAuth } from "@clerk/expo";
+import { UserButton } from "@clerk/expo/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { useState } from "react";
-import {
-	FlatList,
-	RefreshControl,
-	ScrollView,
-	Text,
-	TouchableOpacity,
-	View,
-} from "react-native";
+import { FlatList, RefreshControl, ScrollView, Text, View } from "react-native";
 
 export default function Index() {
 	const { signOut } = useAuth();
@@ -41,13 +35,15 @@ export default function Index() {
 		<View style={styles.container}>
 			<View style={styles.header}>
 				<Text style={styles.headerTitle}>spotlight</Text>
-				<TouchableOpacity onPress={() => signOut()}>
+
+				{/* <TouchableOpacity onPress={() => signOut()}>
 					<Ionicons
 						name="log-out-outline"
 						size={24}
 						color={COLORS.white}
 					/>
-				</TouchableOpacity>
+				</TouchableOpacity> */}
+				<UserButton />
 			</View>
 
 			<FlatList
@@ -91,6 +87,15 @@ const NoPostFound = () => {
 		>
 			<Text style={{ fontSize: 20, color: COLORS.primary }}>
 				No Post Found
+			</Text>
+			<Text
+				style={{
+					fontSize: 14,
+					color: COLORS.primary,
+					marginTop: 5,
+				}}
+			>
+				Click the <Ionicons name="add-circle" size={20} /> to create one
 			</Text>
 		</View>
 	);

@@ -1,5 +1,5 @@
 import { COLORS } from "@/constants/theme";
-import { Dimensions, Platform, StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 
 const { width } = Dimensions.get("window");
 
@@ -133,10 +133,11 @@ export const styles = StyleSheet.create({
     marginBottom: 8,
   },
   modalContainer: {
-    backgroundColor: COLORS.background,
-	 marginBottom: Platform.OS === "ios" ? 44 : 0,
+	  backgroundColor: "#242323",
+	 borderTopLeftRadius: 20,
+	 borderTopRightRadius: 20,
     flex: 1,
-    marginTop: Platform.OS === "ios" ? 44 : 0,
+    marginTop: 44,
   },
   modalHeader: {
     flexDirection: "row",
@@ -193,7 +194,9 @@ export const styles = StyleSheet.create({
     paddingVertical: 12,
     borderTopWidth: 0.5,
     borderTopColor: COLORS.surface,
-    backgroundColor: COLORS.background,
+	  backgroundColor: COLORS.background,
+	 marginBottom: 0,
+	 paddingBottom: 50
   },
   input: {
     flex: 1,
