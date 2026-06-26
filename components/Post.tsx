@@ -102,15 +102,14 @@ export default function Post({ post }: { post: PostProps }) {
 							color={COLORS.white}
 						/>
 					</TouchableOpacity>
-				) : (
-					<TouchableOpacity>
-						<Ionicons
-							name="ellipsis-horizontal"
-							size={20}
-							color={COLORS.white}
-						/>
-					</TouchableOpacity>
-				)}
+				) : // <TouchableOpacity>
+				// 	<Ionicons
+				// 		name="ellipsis-horizontal"
+				// 		size={20}
+				// 		color={COLORS.white}
+				// 	/>
+				// </TouchableOpacity>
+				null}
 			</View>
 
 			{/* Image */}
