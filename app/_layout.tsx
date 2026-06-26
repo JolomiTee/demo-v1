@@ -1,5 +1,6 @@
 import ClerkConvexProviders from "@/components/providers/Clerk_Convex_Providers";
 import { useFonts } from "expo-font";
+import { NavigationBar } from "expo-navigation-bar";
 import { Slot, SplashScreen } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback } from "react";
@@ -28,6 +29,7 @@ export default function RootLayout() {
 				>
 					<Slot />
 				</SafeAreaView>
+				<NavigationBar style="light" />
 				<StatusBar style="light" />
 			</SafeAreaProvider>
 		</ClerkConvexProviders>

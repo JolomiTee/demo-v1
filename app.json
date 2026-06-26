@@ -1,11 +1,11 @@
 {
 	"expo": {
-		"name": "demo-v1",
-		"slug": "demo-v1",
+		"name": "spotlight",
+		"slug": "spotlight",
 		"version": "1.0.0",
 		"orientation": "portrait",
 		"icon": "./assets/images/icon.png",
-		"scheme": "demo-v1",
+		"scheme": "spotlight",
 		"userInterfaceStyle": "automatic",
 		//  "newArchEnabled": true,
 		"ios": {
