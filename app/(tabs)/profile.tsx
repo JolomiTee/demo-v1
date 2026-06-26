@@ -254,9 +254,9 @@ export default function ProfileScreen() {
 
 function NoPostsFound() {
 	return (
-		<View>
+		<View style={styles.noPostsContainer}>
 			<Ionicons name="image-outline" size={48} color={COLORS.primary} />
-			<Text style={{ fontSize: 20, color: COLORS.white }}>No post yet</Text>
+			<Text style={styles.noPostsText}>No post yet</Text>
 		</View>
 	);
 }
