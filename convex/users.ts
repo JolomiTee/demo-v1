@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 import { mutation, MutationCtx, query, QueryCtx } from "./_generated/server";
 
 export async function getAuthenticatedUser(ctx: QueryCtx | MutationCtx) {
@@ -67,3 +68,84 @@ export const updatesProfile = mutation({
 		})
 	}
 })
+
+export const getUserProfile = query({
+	args: { id: v.id("users") },
+	handler: async (ctx, args) => {
+		const user = await ctx.db.get(args.id)
+		if (!user) throw new Error("User not found")
+
+			return user
+	}
+})
+
+export const isFollowing = query({
+	args: { followingId: v.id("users") },
+	handler: async (ctx, args) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) return [];
+
+		const user = await ctx.db.query("users")
+			.withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+			.first();
+
+
+		if (!user) throw new Error("User not found")
+
+			const follow = await ctx.db.query("follows").withIndex("by_both", (q) => q.eq("followerId", user._id).eq("followingId", args.followingId) ).first()
+
+			return !!follow
+	}
+})
+
+export const toggleFollow = mutation({
+	args: { followingId: v.id("users") },
+	handler: async (ctx, args) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) return [];
+
+		const user = await getAuthenticatedUser(ctx)
+
+		const existing = await ctx.db.query("follows").withIndex("by_both", (q) => q.eq("followerId", user._id).eq("followingId", args.followingId) ).first()
+
+		if (existing) {
+			// unfollow
+			await ctx.db.delete(existing._id)
+			await updateFollowCount(ctx, user._id, args.followingId, false)
+		} else {
+			await ctx.db.insert("follows", {
+				followerId: user._id,
+				followingId: args.followingId
+			})
+			await updateFollowCount(ctx, user._id, args.followingId, true)
+
+			// create a notification
+			await ctx.db.insert("notifications", {
+				recieverId: args.followingId,
+				senderId: user._id,
+				type: "follow"
+			})
+
+		}
+	}
+})
+
+async function updateFollowCount (
+	ctx: MutationCtx,
+	followerId: Id<"users">,
+	followingId: Id<"users">,
+	isFollow: boolean
+) {
+	const follower = await ctx.db.get(followerId)
+	const following = await ctx.db.get(followingId)
+
+	if (follower && following) {
+		await ctx.db.patch(followerId, {
+			following: follower.following + (isFollow ? 1 : -1),
+		})
+
+		await ctx.db.patch(followingId, {
+			followers: following.followers + (isFollow ? 1 : -1)
+		})
+	}
+}

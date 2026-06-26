@@ -10,26 +10,36 @@ export function NotificationItem({ notification }: any) {
 	return (
 		<View style={styles.notificationItem}>
 			<View style={styles.notificationContent}>
-				<Link href="/notifications">
-					<TouchableOpacity style={styles.avatarContainer}>
-						<Image
-							source={notification.sender.image}
-							style={styles.avatar}
-							contentFit="cover"
-							transition={200}
-						/>
-						<View style={styles.iconBadge}>
-							{notification.type === "like" ? (
-								<Ionicons
-									name="heart"
-									size={14}
-									color={COLORS.primary}
-								/>
-							) : notification.type === "follow" ? (
-								<Ionicons name="person-add" size={14} color="#8b5cf6" />
-							) : (
-								<Ionicons name="chatbubble" size={14} color="#3b82f6" />
-							)}
+				<Link href={`/user/${notification.sender._id}`} asChild>
+					<TouchableOpacity>
+						<View style={styles.avatarContainer}>
+							<Image
+								source={notification.sender.image}
+								style={styles.avatar}
+								contentFit="cover"
+								transition={200}
+							/>
+							<View style={styles.iconBadge}>
+								{notification.type === "like" ? (
+									<Ionicons
+										name="heart"
+										size={14}
+										color={COLORS.primary}
+									/>
+								) : notification.type === "follow" ? (
+									<Ionicons
+										name="person-add"
+										size={14}
+										color="#8b5cf6"
+									/>
+								) : (
+									<Ionicons
+										name="chatbubble"
+										size={14}
+										color="#3b82f6"
+									/>
+								)}
+							</View>
 						</View>
 					</TouchableOpacity>
 				</Link>

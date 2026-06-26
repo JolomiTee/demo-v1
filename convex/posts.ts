@@ -205,7 +205,6 @@ export const getPostsByUser = query({
 			.first();
 
 
-			if (!user) return [];
 		if (!user) throw new Error("User not found")
 
 		const posts = await ctx.db.query("posts").withIndex("by_user", (q) => q.eq("userId", args.userId || user._id)).collect()
